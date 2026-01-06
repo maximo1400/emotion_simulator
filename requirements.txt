@@ -1,0 +1,8 @@
+pandas
+pyarrow
+numpy
+python-dotenv
+seaborn
+scipy
+notebook
+ipykernel

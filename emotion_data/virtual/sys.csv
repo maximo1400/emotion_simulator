@@ -1,0 +1,154 @@
+,event,msg,img,round
+0,mentalCommand,MC_Started,Car race 3,0
+1,mentalCommand,MC_Succeeded,Car race 3,0
+2,mentalCommand,MC_Completed,Car race 3,0
+3,mentalCommand,MC_Started,Car race 2,0
+4,mentalCommand,MC_Succeeded,Car race 2,0
+5,mentalCommand,MC_Completed,Car race 2,0
+6,mentalCommand,MC_Started,Cat 8,0
+7,mentalCommand,MC_Succeeded,Cat 8,0
+8,mentalCommand,MC_Completed,Cat 8,0
+9,mentalCommand,MC_Started,Baby 4,0
+10,mentalCommand,MC_Succeeded,Baby 4,0
+11,mentalCommand,MC_Completed,Baby 4,0
+12,mentalCommand,MC_Started,Office supplies 2,0
+13,mentalCommand,MC_Succeeded,Office supplies 2,0
+14,mentalCommand,MC_Completed,Office supplies 2,0
+15,mentalCommand,MC_Started,Lava 1,0
+16,mentalCommand,MC_Succeeded,Lava 1,0
+17,mentalCommand,MC_Completed,Lava 1,0
+18,mentalCommand,MC_Started,Mother 4,0
+19,mentalCommand,MC_Succeeded,Mother 4,0
+20,mentalCommand,MC_Completed,Mother 4,0
+21,mentalCommand,MC_Started,Wall 2,0
+22,mentalCommand,MC_Succeeded,Wall 2,0
+23,mentalCommand,MC_Completed,Wall 2,0
+24,mentalCommand,MC_Started,Lightning 3,0
+25,mentalCommand,MC_Succeeded,Lightning 3,0
+26,mentalCommand,MC_Completed,Lightning 3,0
+27,mentalCommand,MC_Started,Tumor 1,0
+28,mentalCommand,MC_Succeeded,Tumor 1,0
+29,mentalCommand,MC_Completed,Tumor 1,0
+30,mentalCommand,MC_Started,Dog 14,0
+31,mentalCommand,MC_Succeeded,Dog 14,0
+32,mentalCommand,MC_Completed,Dog 14,0
+33,mentalCommand,MC_Started,Bear 2,0
+34,mentalCommand,MC_Succeeded,Bear 2,0
+35,mentalCommand,MC_Completed,Bear 2,0
+36,mentalCommand,MC_Started,Fire 9,0
+37,mentalCommand,MC_Succeeded,Fire 9,0
+38,mentalCommand,MC_Completed,Fire 9,0
+39,mentalCommand,MC_Started,Cockroach 1,0
+40,mentalCommand,MC_Succeeded,Cockroach 1,0
+41,mentalCommand,MC_Completed,Cockroach 1,0
+42,mentalCommand,MC_Started,KKK rally 2,0
+43,mentalCommand,MC_Succeeded,KKK rally 2,0
+44,mentalCommand,MC_Completed,KKK rally 2,0
+45,mentalCommand,MC_Started,Stingray 1,0
+46,mentalCommand,MC_Succeeded,Stingray 1,0
+47,mentalCommand,MC_Completed,Stingray 1,0
+48,mentalCommand,MC_Started,Exercise 2,0
+49,mentalCommand,MC_Succeeded,Exercise 2,0
+50,mentalCommand,MC_Completed,Exercise 2,0
+51,mentalCommand,MC_Started,Dead bodies 3,0
+52,mentalCommand,MC_Succeeded,Dead bodies 3,0
+53,mentalCommand,MC_Completed,Dead bodies 3,0
+54,mentalCommand,MC_Started,Explosion 6,0
+55,mentalCommand,MC_Succeeded,Explosion 6,0
+56,mentalCommand,MC_Completed,Explosion 6,0
+57,mentalCommand,MC_Started,Seal 1,0
+58,mentalCommand,MC_Succeeded,Seal 1,0
+59,mentalCommand,MC_Completed,Seal 1,0
+60,mentalCommand,MC_Started,Pollution 1,0
+61,mentalCommand,MC_Succeeded,Pollution 1,0
+62,mentalCommand,MC_Completed,Pollution 1,0
+63,mentalCommand,MC_Started,Parachuting 4,0
+64,mentalCommand,MC_Succeeded,Parachuting 4,0
+65,mentalCommand,MC_Completed,Parachuting 4,0
+66,mentalCommand,MC_Started,Dog 6,0
+67,mentalCommand,MC_Succeeded,Dog 6,0
+68,mentalCommand,MC_Completed,Dog 6,0
+69,mentalCommand,MC_Started,Bark 3,0
+70,mentalCommand,MC_Succeeded,Bark 3,0
+71,mentalCommand,MC_Completed,Bark 3,0
+72,mentalCommand,MC_Started,Neutral face 4,0
+73,mentalCommand,MC_Succeeded,Neutral face 4,0
+74,mentalCommand,MC_Completed,Neutral face 4,0
+75,mentalCommand,MC_Started,Sunset 3,0
+76,mentalCommand,MC_Succeeded,Sunset 3,0
+77,mentalCommand,MC_Completed,Sunset 3,0
+78,mentalCommand,MC_Started,Snake 4,0
+79,mentalCommand,MC_Succeeded,Snake 4,0
+80,mentalCommand,MC_Completed,Snake 4,0
+81,mentalCommand,MC_Started,Dummy 1,0
+82,mentalCommand,MC_Succeeded,Dummy 1,0
+83,mentalCommand,MC_Completed,Dummy 1,0
+84,mentalCommand,MC_Started,Football player 1,0
+85,mentalCommand,MC_Succeeded,Football player 1,0
+86,mentalCommand,MC_Completed,Football player 1,0
+87,mentalCommand,MC_Started,Socks 1,0
+88,mentalCommand,MC_Succeeded,Socks 1,0
+89,mentalCommand,MC_Completed,Socks 1,0
+90,mentalCommand,MC_Started,Baby 2,0
+91,mentalCommand,MC_Succeeded,Baby 2,0
+92,mentalCommand,MC_Completed,Baby 2,0
+93,mentalCommand,MC_Started,Exercise 1,0
+94,mentalCommand,MC_Succeeded,Exercise 1,0
+95,mentalCommand,MC_Completed,Exercise 1,0
+96,mentalCommand,MC_Started,Miserable pose 3,0
+97,mentalCommand,MC_Succeeded,Miserable pose 3,0
+98,mentalCommand,MC_Completed,Miserable pose 3,0
+99,mentalCommand,MC_Started,Cockroach 4,0
+100,mentalCommand,MC_Succeeded,Cockroach 4,0
+101,mentalCommand,MC_Completed,Cockroach 4,0
+102,mentalCommand,MC_Started,Fence 2,0
+103,mentalCommand,MC_Succeeded,Fence 2,0
+104,mentalCommand,MC_Completed,Fence 2,0
+105,mentalCommand,MC_Started,Explosion 5,0
+106,mentalCommand,MC_Succeeded,Explosion 5,0
+107,mentalCommand,MC_Completed,Explosion 5,0
+108,mentalCommand,MC_Started,Rafting 5,0
+109,mentalCommand,MC_Succeeded,Rafting 5,0
+110,mentalCommand,MC_Completed,Rafting 5,0
+111,mentalCommand,MC_Started,Dog 23,0
+112,mentalCommand,MC_Succeeded,Dog 23,0
+113,mentalCommand,MC_Completed,Dog 23,0
+114,mentalCommand,MC_Started,Fireworks 2,0
+115,mentalCommand,MC_Succeeded,Fireworks 2,0
+116,mentalCommand,MC_Completed,Fireworks 2,0
+117,mentalCommand,MC_Started,Bark 4,0
+118,mentalCommand,MC_Succeeded,Bark 4,0
+119,mentalCommand,MC_Completed,Bark 4,0
+120,mentalCommand,MC_Started,Bark 1,0
+121,mentalCommand,MC_Succeeded,Bark 1,0
+122,mentalCommand,MC_Completed,Bark 1,0
+123,mentalCommand,MC_Started,Rocks 2,0
+124,mentalCommand,MC_Succeeded,Rocks 2,0
+125,mentalCommand,MC_Completed,Rocks 2,0
+126,mentalCommand,MC_Started,Dirt 1,0
+127,mentalCommand,MC_Succeeded,Dirt 1,0
+128,mentalCommand,MC_Completed,Dirt 1,0
+129,mentalCommand,MC_Started,Fire 6,0
+130,mentalCommand,MC_Succeeded,Fire 6,0
+131,mentalCommand,MC_Completed,Fire 6,0
+132,mentalCommand,MC_Started,Fire 8,0
+133,mentalCommand,MC_Succeeded,Fire 8,0
+134,mentalCommand,MC_Completed,Fire 8,0
+135,mentalCommand,MC_Started,Lake 9,0
+136,mentalCommand,MC_Succeeded,Lake 9,0
+137,mentalCommand,MC_Completed,Lake 9,0
+138,mentalCommand,MC_Started,Archery 1,0
+139,mentalCommand,MC_Succeeded,Archery 1,0
+140,mentalCommand,MC_Completed,Archery 1,0
+141,mentalCommand,MC_Started,Rainbow 2,0
+142,mentalCommand,MC_Succeeded,Rainbow 2,0
+143,mentalCommand,MC_Completed,Rainbow 2,0
+144,mentalCommand,MC_Started,Cotton swabs 3,0
+145,mentalCommand,MC_Succeeded,Cotton swabs 3,0
+146,mentalCommand,MC_Completed,Cotton swabs 3,0
+147,mentalCommand,MC_Started,Stingray 2,0
+148,mentalCommand,MC_Succeeded,Stingray 2,0
+149,mentalCommand,MC_Completed,Stingray 2,0
+150,mentalCommand,MC_Started,Sunset 6,0
+151,mentalCommand,MC_Succeeded,Sunset 6,0
+152,mentalCommand,MC_Completed,Sunset 6,0
