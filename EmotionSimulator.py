@@ -22,7 +22,7 @@ class EmotionSimulator:
         "happy": {"va": (0.0, 1.0), "ar": (0.0, 1.0)},
         "surprised": {"va": (0.5, 1.0), "ar": (0.5, 1.0)},
     }
-    sequence = [("sad", 5), ("happy", 5), ("angry", 5), ("relaxed", 5)]
+    sequence = [("sad", 1), ("happy", 1), ("angry", 1), ("relaxed", 1)]
     data_frec = 8  # Hz
     data = None
 
@@ -49,6 +49,8 @@ class EmotionSimulator:
         emotions = []
         durations = []
         states = []
+        print(self.data.columns)
+        print(self.data.head())
 
         for state, duration in self.sequence:
             emotions.append(state)
@@ -60,11 +62,10 @@ class EmotionSimulator:
             t_start = time.time()
             t_cur = t_start
             while t_cur - t_start < duration:
-                print(
-                    states[emotions.index(state)]
-                    .sample(n=1)
-                    .to_dict(orient="records")[0]
-                )
+                row = states[durations.index(duration)].sample(n=1).iloc[0]
+                # Remove the last three columns (valence, arousal, state)
+                row = row.iloc[:-3]
+                print(row.values.tolist())
                 time.sleep(1 / self.data_frec)
                 t_cur = time.time()
 

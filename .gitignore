@@ -205,3 +205,6 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+# emotion_data/Dreamer/
+emotion_data/Dreamer/DREAMER.mat
+emotion_data/virtual/dummy_pow.feather
