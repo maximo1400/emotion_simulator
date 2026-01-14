@@ -16,14 +16,27 @@ dataset = DREAMERDataset(
 
 rows = []
 for idx in range(len(dataset)):
-    eeg, shape, dic = dataset[idx]  # adjust if your print(dataset[0]) shows a different structure
+    eeg, dic = dataset[idx]  # adjust if your print(dataset[0]) shows a different structure
     # eeg: (n_channels, n_points)
     eeg = np.array(eeg)
+    eeg = eeg[0]
     flat = eeg.flatten()
-    row = {"sample_idx": idx}
-    for i, v in enumerate(flat):
-        row[f"eeg_{i}"] = float(v)
-    rows.append(row)
+    print(dic)
+    star_at = dic["start_at"]
+    end_at = dic["end_at"]
+    clip_idx = dic["clip_id"]
+    subject_id = dic["subject_id"]
+    trial_id = dic["trial_id"]
+    valence = dic["valence"]
+    arousal = dic["arousal"]
+    dominance = dic["dominance"]
+    baseline_id = dic["baseline_id"]
+    _record_id = dic["_record_id"]
 
-df = pd.DataFrame(rows)
-df.to_csv("dreamer_eeg_flat.csv", index=False)
+#     row = {"sample_idx": idx}
+#     for i, v in enumerate(flat):
+#         row[f"eeg_{i}"] = float(v)
+#     rows.append(row)
+
+# df = pd.DataFrame(rows)
+# df.to_csv("dreamer_eeg_flat.csv", index=False)
