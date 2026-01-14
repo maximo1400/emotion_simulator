@@ -6,3 +6,4 @@ seaborn
 scipy
 notebook
 ipykernel
+torcheeg
