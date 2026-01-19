@@ -210,3 +210,4 @@ emotion_data/Dreamer/DREAMER.mat
 emotion_data/virtual/dummy_pow.feather
 torcheeg/
 .torcheeg/
+emotion_data/Dreamer/dreamer_eeg.feather
