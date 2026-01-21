@@ -32,6 +32,28 @@ def slew_clip(data: np.ndarray, max_delta: float = 30.0) -> np.ndarray:
     return np.cumsum(diff, axis=0)
 
 
+def hann_window_emotiv(n: int, scale: float = 1.0) -> np.ndarray:
+    """
+    Exact replica of Emotiv's loop-based Hann window.
+
+    Formula: w[i] = 0.5 * (1 - cos(2π * (i+1) / (n+1)))   i = 0 … n-1
+
+    Parameters
+    ----------
+    n : int
+        Window length.
+    scale : float
+        Amplitude multiplier (Emotiv uses 2.0 in some pipelines).
+
+    Returns
+    -------
+    w : ndarray, shape (n,), dtype float32
+    """
+    idx = np.arange(1, n + 1, dtype=np.float32)  # 1 … n
+    w = 0.5 * (1 - np.cos(2.0 * np.pi * idx / (n + 1)))
+    return (scale * w).astype(np.float32)
+
+
 def emotiv_bandpower(
     data: np.ndarray,
     fs: int = 128,
@@ -84,10 +106,16 @@ def emotiv_bandpower(
         frames[i] = data[start : start + win_size]
 
     # 4) DC removal per epoch
-    frames -= frames.mean(axis=1, keepdims=True)
+    q25, q75 = np.percentile(frames, [25, 75], axis=1, keepdims=True)
+    iqm_ref = frames[(frames >= q25) & (frames <= q75)].mean(axis=1, keepdims=True)
+    frames -= iqm_ref
+    # Alternative: mean removal
+    # frames -= frames.mean(axis=1, keepdims=True)
 
     # 5) Hann window (×2 scaling as per Emotiv)
-    hann = (2 * np.hanning(win_size)).astype(np.float32)
+    # hann = (2 * np.hanning(win_size)).astype(np.float32) # NumPy version
+    hann = hann_window_emotiv(win_size, scale=2.0)  # Emotiv exact version
+
     frames *= hann[None, :, None]
 
     # 6) FFT → power spectrum
@@ -164,6 +192,7 @@ def dreamer_to_bandpower(
 
         # Skip if too short
         if eeg.shape[0] < win_size:
+            print(f"Skipping subject {subj} trial {trial}: too short")
             continue
 
         # Compute band power
