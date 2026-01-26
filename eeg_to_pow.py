@@ -107,7 +107,13 @@ def emotiv_bandpower(
 
     # 4) DC removal per epoch
     q25, q75 = np.percentile(frames, [25, 75], axis=1, keepdims=True)
-    iqm_ref = frames[(frames >= q25) & (frames <= q75)].mean(axis=1, keepdims=True)
+    mask = (frames >= q25) & (frames <= q75)  # (n_frames, win_size, n_ch)
+    sums = (frames * mask).sum(
+        axis=1, keepdims=True
+    )  # sum inside IQR per frame/channel
+    counts = mask.sum(axis=1, keepdims=True).astype(np.float32)
+    fallback = frames.mean(axis=1, keepdims=True)
+    iqm_ref = np.where(counts == 0, fallback, sums / counts)
     frames -= iqm_ref
     # Alternative: mean removal
     # frames -= frames.mean(axis=1, keepdims=True)
