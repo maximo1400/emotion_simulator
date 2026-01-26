@@ -1,7 +1,27 @@
 import time
 import pyarrow.feather as feather
+import queue
 
+
+# fmt: off
 input = "emotion_data/Dreamer/dreamer_bandpower_frames.feather"
+pow_columns= [
+        "AF3/theta", "AF3/alpha", "AF3/betaL", "AF3/betaH", "AF3/gamma",
+        "F7/theta",  "F7/alpha",  "F7/betaL",  "F7/betaH",  "F7/gamma",
+        "F3/theta",  "F3/alpha",  "F3/betaL",  "F3/betaH",  "F3/gamma",
+        "FC5/theta", "FC5/alpha", "FC5/betaL", "FC5/betaH", "FC5/gamma",
+        "T7/theta",  "T7/alpha",  "T7/betaL",  "T7/betaH",  "T7/gamma",
+        "P7/theta",  "P7/alpha",  "P7/betaL",  "P7/betaH",  "P7/gamma",
+        "O1/theta",  "O1/alpha",  "O1/betaL",  "O1/betaH",  "O1/gamma",
+        "O2/theta",  "O2/alpha",  "O2/betaL",  "O2/betaH",  "O2/gamma",
+        "P8/theta",  "P8/alpha",  "P8/betaL",  "P8/betaH",  "P8/gamma",
+        "T8/theta",  "T8/alpha",  "T8/betaL",  "T8/betaH",  "T8/gamma",
+        "FC6/theta", "FC6/alpha", "FC6/betaL", "FC6/betaH", "FC6/gamma",
+        "F4/theta",  "F4/alpha",  "F4/betaL",  "F4/betaH",  "F4/gamma",
+        "F8/theta",  "F8/alpha",  "F8/betaL",  "F8/betaH",  "F8/gamma",
+        "AF4/theta", "AF4/alpha", "AF4/betaL", "AF4/betaH", "AF4/gamma"]
+
+# fmt: on
 
 
 class EmotionSimulator:
@@ -25,8 +45,11 @@ class EmotionSimulator:
     sub_id = 1
     data_frec = 8  # Hz
     data = None
+    out_queue = None
+    emotiv_columns = pow_columns
 
-    def __init__(self):
+    def __init__(self, queue: queue.Queue):
+        self.out_queue = queue
         pass
 
     def load_data(self):
@@ -64,24 +87,35 @@ class EmotionSimulator:
             self.data.loc[condition, "state"] = state
             # print(self.data[condition].shape[0], "rows assigned to state", state)
 
+    def update_queue(self, pow) -> None:
+        # while not self.out_queue.empty():
+        #     time.sleep(0.1)
+
+        self.out_queue.put(pow)
+        print(f"new data put in queue, mean: {sum(pow) / len(pow):.4f}")
+
+        # while not self.out_queue.empty():
+        #     time.sleep(0.1)
+
     def output_loop(self):
-        emotions = []
-        durations = []
-        states = []
+        pow_by_state = {}
         row_read = {}
         # print(self.data.columns)
         # print(self.data.head())
         # print(self.data["state"].value_counts())
 
         for state, duration in self.sequence:
-            emotions.append(state)
-            durations.append(duration)
-            # filter data for the given state and subject id
-            s_state = self.data["state"] == state
-            s_sub = self.data["subject_id"] == self.sub_id
-            mask = s_state & s_sub
-            states.append(self.data[mask])
-            row_read[state] = 0
+            if pow_by_state.get(state) is None:
+                # filter data for the given state and subject id
+                s_state = self.data["state"] == state
+                s_sub = self.data["subject_id"] == self.sub_id
+                mask = s_state & s_sub
+                data = self.data[mask].reindex(
+                    columns=self.emotiv_columns
+                )  # reset index
+                # pow_by_state.append(data)
+                pow_by_state[state] = data
+                row_read[state] = 0
 
         for idx in range(len(self.sequence)):
             state, duration = self.sequence[idx]
@@ -89,20 +123,20 @@ class EmotionSimulator:
             t_cur = t_start
             while t_cur - t_start < duration:
                 # row = states[idx].sample(n=1).iloc[0] # Get a random row
-                row = states[idx].iloc[row_read[state]]  # Get row in sequence
+                row = pow_by_state[state].iloc[row_read[state]]  # Get row in sequence
 
-                # Remove the last three columns (valence, arousal, state)
-                row = row.iloc[:-3]
-                print(row.values.tolist())
+                # print(row.values.tolist())
+                self.update_queue(row.values.tolist())
                 time.sleep(1 / self.data_frec)
                 row_read[state] += 1
-                if row_read[state] >= states[idx].shape[0]:
+                if row_read[state] >= pow_by_state[state].shape[0]:
                     row_read[state] = 0
                 t_cur = time.time()
 
 
 def main():
-    simulator = EmotionSimulator()
+    out = queue.Queue()
+    simulator = EmotionSimulator(out)
     simulator.load_data()
     simulator.add_states()
     simulator.output_loop()

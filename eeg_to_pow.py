@@ -14,8 +14,8 @@ BANDS = {
     # "delta": (0.5, 4),
     "theta": (4, 8),
     "alpha": (8, 12),
-    "betal": (12, 16),
-    "betah": (16, 25),
+    "betaL": (12, 16),
+    "betaH": (16, 25),
     "gamma": (25, 45),
 }
 
@@ -178,7 +178,7 @@ def dreamer_to_bandpower(
     -------
     pd.DataFrame
         Columns: subject_id, trial_id, clip_id, valence, arousal, dominance,
-                 baseline_id, {channel}_{band} for all 14×5 combinations,
+                 baseline_id, {channel}/{band} for all 14×5 combinations,
                  (plus frame_time if aggregate is None).
     """
     # Validate channels
@@ -217,7 +217,7 @@ def dreamer_to_bandpower(
                 row["frame_time"] = t[f_idx]
                 for ch_idx, ch in enumerate(EEG_CHANNELS):
                     for b_idx, band in enumerate(band_names):
-                        row[f"{ch}_{band}"] = bp[f_idx, ch_idx, b_idx]
+                        row[f"{ch}/{band}"] = bp[f_idx, ch_idx, b_idx]
                 records.append(row)
         else:
             # Aggregate across frames
@@ -231,7 +231,7 @@ def dreamer_to_bandpower(
             row = {"subject_id": subj, "trial_id": trial, **meta}
             for ch_idx, ch in enumerate(EEG_CHANNELS):
                 for b_idx, band in enumerate(band_names):
-                    row[f"{ch}_{band}"] = bp_agg[ch_idx, b_idx]
+                    row[f"{ch}/{band}"] = bp_agg[ch_idx, b_idx]
             records.append(row)
 
     return pd.DataFrame(records)
