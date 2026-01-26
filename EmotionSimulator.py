@@ -17,12 +17,13 @@ class EmotionSimulator:
         "fearful": {"va": (-0.5, 0.0), "ar": (0.0, 1.0)},
         # High valence, low arousal
         "relaxed": {"va": (0.0, 1.0), "ar": (-1.0, 0.0)},
-        "neutralF": {"va": (-0.2, 0.2), "ar": (-0.2, 0.2)},
+        "neutral": {"va": (-0.2, 0.2), "ar": (-0.2, 0.2)},
         # High valence, high arousal
         "happy": {"va": (0.0, 1.0), "ar": (0.0, 1.0)},
         "surprised": {"va": (0.5, 1.0), "ar": (0.5, 1.0)},
     }
     sequence = [("sad", 1), ("happy", 1), ("angry", 1), ("relaxed", 1)]
+    sub_id = 1
     data_frec = 8  # Hz
     data = None
 
@@ -32,17 +33,22 @@ class EmotionSimulator:
     def load_data(self):
         self.data = feather.read_feather(self.input)
 
-    def normalize_valence_arousal(self):
-        "normalize valence and arousal to self.emotion_range"
-        va_min, va_max = self.emotion_range
+        # normalize valence and arousal to self.emotion_range
+        emot_min, emot_max = self.emotion_range
 
-        self.data["valence"] = (self.data["valence"] - self.data["valence"].min()) / (
-            self.data["valence"].max() - self.data["valence"].min()
-        ) * (va_max - va_min) + va_min
+        val = self.data["valence"]
+        val_min = val.min()
+        val_max = val.max()
+        self.data["valence"] = ((val - val_min) / (val_max - val_min)) * (
+            emot_max - emot_min
+        ) + emot_min
 
-        self.data["arousal"] = (self.data["arousal"] - self.data["arousal"].min()) / (
-            self.data["arousal"].max() - self.data["arousal"].min()
-        ) * (va_max - va_min) + va_min
+        ar = self.data["arousal"]
+        ar_min = ar.min()
+        ar_max = ar.max()
+        self.data["arousal"] = ((ar - ar_min) / (ar_max - ar_min)) * (
+            emot_max - emot_min
+        ) + emot_min
 
     def add_states(self):
         self.data["state"] = "neutral"  # Default state
@@ -57,7 +63,7 @@ class EmotionSimulator:
                 & (self.data["arousal"] <= ar_max)
             )
             self.data.loc[condition, "state"] = state
-            print(self.data[condition].shape[0], "rows assigned to state", state)
+            # print(self.data[condition].shape[0], "rows assigned to state", state)
 
     def output_loop(self):
         emotions = []
@@ -65,8 +71,7 @@ class EmotionSimulator:
         states = []
         # print(self.data.columns)
         # print(self.data.head())
-        # print row count per state
-        print(self.data["state"].value_counts())
+        # print(self.data["state"].value_counts())
 
         for state, duration in self.sequence:
             emotions.append(state)
