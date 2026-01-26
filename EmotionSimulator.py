@@ -2,7 +2,7 @@ import time
 import pandas as pd
 import pyarrow.feather as feather
 
-input = "emotion_data/virtual/dummy_pow.feather"
+input = "emotion_data/Dreamer/dreamer_bandpower_frames.feather"
 
 
 class EmotionSimulator:
@@ -17,7 +17,7 @@ class EmotionSimulator:
         "fearful": {"va": (-0.5, 0.0), "ar": (0.0, 1.0)},
         # High valence, low arousal
         "relaxed": {"va": (0.0, 1.0), "ar": (-1.0, 0.0)},
-        "neutral": {"va": (-0.2, 0.2), "ar": (-0.2, 0.2)},
+        "neutralF": {"va": (-0.2, 0.2), "ar": (-0.2, 0.2)},
         # High valence, high arousal
         "happy": {"va": (0.0, 1.0), "ar": (0.0, 1.0)},
         "surprised": {"va": (0.5, 1.0), "ar": (0.5, 1.0)},
@@ -32,11 +32,24 @@ class EmotionSimulator:
     def load_data(self):
         self.data = feather.read_feather(self.input)
 
+    def normalize_valence_arousal(self):
+        "normalize valence and arousal to self.emotion_range"
+        va_min, va_max = self.emotion_range
+
+        self.data["valence"] = (self.data["valence"] - self.data["valence"].min()) / (
+            self.data["valence"].max() - self.data["valence"].min()
+        ) * (va_max - va_min) + va_min
+
+        self.data["arousal"] = (self.data["arousal"] - self.data["arousal"].min()) / (
+            self.data["arousal"].max() - self.data["arousal"].min()
+        ) * (va_max - va_min) + va_min
+
     def add_states(self):
         self.data["state"] = "neutral"  # Default state
         for state, ranges in self.states.items():
             va_min, va_max = ranges["va"]
             ar_min, ar_max = ranges["ar"]
+
             condition = (
                 (self.data["valence"] >= va_min)
                 & (self.data["valence"] <= va_max)
@@ -44,13 +57,16 @@ class EmotionSimulator:
                 & (self.data["arousal"] <= ar_max)
             )
             self.data.loc[condition, "state"] = state
+            print(self.data[condition].shape[0], "rows assigned to state", state)
 
     def output_loop(self):
         emotions = []
         durations = []
         states = []
-        print(self.data.columns)
-        print(self.data.head())
+        # print(self.data.columns)
+        # print(self.data.head())
+        # print row count per state
+        print(self.data["state"].value_counts())
 
         for state, duration in self.sequence:
             emotions.append(state)
