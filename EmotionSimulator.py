@@ -1,5 +1,4 @@
 import time
-import pandas as pd
 import pyarrow.feather as feather
 
 input = "emotion_data/Dreamer/dreamer_bandpower_frames.feather"
@@ -22,7 +21,7 @@ class EmotionSimulator:
         "happy": {"va": (0.0, 1.0), "ar": (0.0, 1.0)},
         "surprised": {"va": (0.5, 1.0), "ar": (0.5, 1.0)},
     }
-    sequence = [("sad", 1), ("happy", 1), ("angry", 1), ("relaxed", 1)]
+    sequence = [("sad", 1), ("happy", 1.5), ("angry", 0.5), ("relaxed", 1)]
     sub_id = 1
     data_frec = 8  # Hz
     data = None
@@ -69,6 +68,7 @@ class EmotionSimulator:
         emotions = []
         durations = []
         states = []
+        row_read = {}
         # print(self.data.columns)
         # print(self.data.head())
         # print(self.data["state"].value_counts())
@@ -76,18 +76,28 @@ class EmotionSimulator:
         for state, duration in self.sequence:
             emotions.append(state)
             durations.append(duration)
-            states_cond = self.data["state"] == state
-            states.append(self.data[states_cond])
+            # filter data for the given state and subject id
+            s_state = self.data["state"] == state
+            s_sub = self.data["subject_id"] == self.sub_id
+            mask = s_state & s_sub
+            states.append(self.data[mask])
+            row_read[state] = 0
 
-        for duration in durations:
+        for idx in range(len(self.sequence)):
+            state, duration = self.sequence[idx]
             t_start = time.time()
             t_cur = t_start
             while t_cur - t_start < duration:
-                row = states[durations.index(duration)].sample(n=1).iloc[0]
+                # row = states[idx].sample(n=1).iloc[0] # Get a random row
+                row = states[idx].iloc[row_read[state]]  # Get row in sequence
+
                 # Remove the last three columns (valence, arousal, state)
                 row = row.iloc[:-3]
                 print(row.values.tolist())
                 time.sleep(1 / self.data_frec)
+                row_read[state] += 1
+                if row_read[state] >= states[idx].shape[0]:
+                    row_read[state] = 0
                 t_cur = time.time()
 
 
