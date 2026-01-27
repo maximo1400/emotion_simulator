@@ -28,7 +28,7 @@ class EmotionSimulator:
     input = input
     # states = ["relaxed", "happy", "sad", "angry", "fearful", "disgusted", "surprised"]
     emotion_range = (-1.0, 1.0)
-    states = {
+    emot_states_area = {
         # Low valence, low arousal
         "sad": {"va": (-1.0, 0.0), "ar": (-1.0, 0.0)},
         # Low valence, high arousal
@@ -42,11 +42,14 @@ class EmotionSimulator:
         "surprised": {"va": (0.5, 1.0), "ar": (0.5, 1.0)},
     }
     sequence = [("sad", 1), ("happy", 1.5), ("angry", 0.5), ("relaxed", 1)]
-    sub_id = 1
+    sub_id = 1  # Subject ID to simulate
     data_frec = 8  # Hz
     data = None
     out_queue = None
     emotiv_columns = pow_columns
+    emot_states = list(emot_states_area.keys())
+    pow_by_state = {}
+    pow_read = {}
 
     def __init__(self, queue: queue.Queue):
         self.out_queue = queue
@@ -74,7 +77,7 @@ class EmotionSimulator:
 
     def add_states(self):
         self.data["state"] = "neutral"  # Default state
-        for state, ranges in self.states.items():
+        for state, ranges in self.emot_states_area.items():
             va_min, va_max = ranges["va"]
             ar_min, ar_max = ranges["ar"]
 
@@ -97,25 +100,23 @@ class EmotionSimulator:
         # while not self.out_queue.empty():
         #     time.sleep(0.1)
 
+    def get_emotion_pow(self):
+        for emot in self.emot_states:
+            s_state = self.data["state"] == emot
+            s_sub = self.data["subject_id"] == self.sub_id
+            mask = s_state & s_sub
+            data = self.data[mask].reindex(columns=self.emotiv_columns)
+            self.pow_by_state[emot] = data
+            self.pow_read[emot] = 0
+
+    def zero_pow_read(self):
+        for emot in self.emot_states:
+            self.pow_read[emot] = 0
+
     def output_loop(self):
-        pow_by_state = {}
-        row_read = {}
         # print(self.data.columns)
         # print(self.data.head())
         # print(self.data["state"].value_counts())
-
-        for state, duration in self.sequence:
-            if pow_by_state.get(state) is None:
-                # filter data for the given state and subject id
-                s_state = self.data["state"] == state
-                s_sub = self.data["subject_id"] == self.sub_id
-                mask = s_state & s_sub
-                data = self.data[mask].reindex(
-                    columns=self.emotiv_columns
-                )  # reset index
-                # pow_by_state.append(data)
-                pow_by_state[state] = data
-                row_read[state] = 0
 
         for idx in range(len(self.sequence)):
             state, duration = self.sequence[idx]
@@ -123,23 +124,29 @@ class EmotionSimulator:
             t_cur = t_start
             while t_cur - t_start < duration:
                 # row = states[idx].sample(n=1).iloc[0] # Get a random row
-                row = pow_by_state[state].iloc[row_read[state]]  # Get row in sequence
+                row = self.pow_by_state[state].iloc[
+                    self.pow_read[state]
+                ]  # Get row in sequence
 
                 # print(row.values.tolist())
                 self.update_queue(row.values.tolist())
                 time.sleep(1 / self.data_frec)
-                row_read[state] += 1
-                if row_read[state] >= pow_by_state[state].shape[0]:
-                    row_read[state] = 0
+                self.pow_read[state] += 1
+                if self.pow_read[state] >= self.pow_by_state[state].shape[0]:
+                    self.pow_read[state] = 0
                 t_cur = time.time()
+
+    def main_loop(self):
+        self.load_data()
+        self.add_states()
+        self.get_emotion_pow()
+        self.output_loop()
 
 
 def main():
     out = queue.Queue()
     simulator = EmotionSimulator(out)
-    simulator.load_data()
-    simulator.add_states()
-    simulator.output_loop()
+    simulator.main_loop()
 
 
 if __name__ == "__main__":
