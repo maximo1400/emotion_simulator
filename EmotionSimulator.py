@@ -4,7 +4,7 @@ import queue
 
 
 # fmt: off
-input = "emotion_data/Dreamer/dreamer_bandpower_frames.feather"
+FILE_PATH = "emotion_data/Dreamer/dreamer_bandpower_frames.feather"
 pow_columns= [
         "AF3/theta", "AF3/alpha", "AF3/betaL", "AF3/betaH", "AF3/gamma",
         "F7/theta",  "F7/alpha",  "F7/betaL",  "F7/betaH",  "F7/gamma",
@@ -25,7 +25,7 @@ pow_columns= [
 
 
 class EmotionSimulator:
-    input = input
+    file_path = FILE_PATH
     # states = ["relaxed", "happy", "sad", "angry", "fearful", "disgusted", "surprised"]
     emotion_range = (-1.0, 1.0)
     emot_states_area = {
@@ -36,10 +36,15 @@ class EmotionSimulator:
         "fearful": {"va": (-0.5, 0.0), "ar": (0.0, 1.0)},
         # High valence, low arousal
         "relaxed": {"va": (0.0, 1.0), "ar": (-1.0, 0.0)},
-        "neutral": {"va": (-0.2, 0.2), "ar": (-0.2, 0.2)},
+        "neutral": {"va": (-0.25, 0.25), "ar": (-0.25, 0.25)},
         # High valence, high arousal
         "happy": {"va": (0.0, 1.0), "ar": (0.0, 1.0)},
         "surprised": {"va": (0.5, 1.0), "ar": (0.5, 1.0)},
+    }
+    sequences = {
+        "basic": [("sad", 1), ("happy", 1), ("angry", 1), ("relaxed", 1)],
+        "extended": [("sad", 1), ("happy", 1.5), ("angry", 0.5), ("relaxed", 1)],
+        "neutral": [("neutral", 5)],
     }
     sequence = [("sad", 1), ("happy", 1.5), ("angry", 0.5), ("relaxed", 1)]
     sub_id = 1  # Subject ID to simulate
@@ -56,7 +61,7 @@ class EmotionSimulator:
         pass
 
     def load_data(self):
-        self.data = feather.read_feather(self.input)
+        self.data = feather.read_feather(self.file_path)
 
         # normalize valence and arousal to self.emotion_range
         emot_min, emot_max = self.emotion_range
@@ -136,9 +141,38 @@ class EmotionSimulator:
                     self.pow_read[state] = 0
                 t_cur = time.time()
 
+    def imput_msg(self):
+        msg = "Select sequence to simulate:\n"
+        i = 0
+        for key in self.sequences.keys():
+            msg += f"{i} - {key}\n"
+            i += 1
+        msg += "or 'q' to quit:\n"
+        return msg
+
+    def decode_msg_num(self, msg_num):
+        i = 0
+        for key in self.sequences.keys():
+            if i == msg_num:
+                return key
+            i += 1
+
     def main_loop(self):
         self.load_data()
         self.add_states()
+        self.get_emotion_pow()
+        while True:
+            msg = self.imput_msg()
+            state = input(msg)
+            if state == "q":
+                break
+            msg = self.decode_msg_num(int(state))
+            if msg in self.sequences.keys():
+                self.sequence = self.sequences[msg]
+                print(f"Selected sequence: {msg}")
+                self.output_loop()
+                self.zero_pow_read()
+
         self.get_emotion_pow()
         self.output_loop()
 
