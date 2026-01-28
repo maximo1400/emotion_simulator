@@ -1,0 +1,108 @@
+emotions:
+  # Column 1 -> Low Valence [-1.0, -0.3]
+  - id: bored
+    label: "Bored"
+    range:
+      valence_min: -1.0
+      valence_max: -0.3
+      arousal_min: -1.0
+      arousal_max: -0.3
+
+  - id: sad
+    label: "Sad"
+    range:
+      valence_min: -1.0
+      valence_max: -0.3
+      arousal_min: -0.3
+      arousal_max: 0.0
+
+  - id: frustrated
+    label: "Frustrated"
+    range:
+      valence_min: -1.0
+      valence_max: -0.3
+      arousal_min:  0.0
+      arousal_max: 0.3
+      
+
+  - id: angry
+    label: "Angry"
+    range:
+      valence_min: -1.0
+      valence_max: -0.3
+      arousal_min:  0.3
+      arousal_max: 1.0
+
+  # Column 2 and 3 -> Mid Valence [-0.3, 0.3]
+  - id: tired
+    label: "Tired"
+    range:
+      valence_min: -0.3
+      valence_max: 0.0
+      arousal_min: -1.0
+      arousal_max: -0.3
+
+  - id: sleepy
+    label: "Sleepy"
+    range:
+      valence_min: 0.0
+      valence_max: 0.3
+      arousal_min: -1.0
+      arousal_max: -0.3
+
+  - id: neutral
+    label: "Neutral"
+    range:
+      valence_min: -0.3
+      valence_max: 0.3
+      arousal_min: -0.3
+      arousal_max: 0.3
+
+  - id: tense
+    label: "Tense"
+    range:
+      valence_min: -0.3
+      valence_max: 0.0
+      arousal_min: 0.3
+      arousal_max: 1.0
+
+  - id: surprise
+    label: "Surprise"
+    range:
+      valence_min: 0
+      valence_max: 0.3
+      arousal_min: 0.3
+      arousal_max: 1.0
+
+  # Column 4 -> High Valence [0.3, 1.0]
+  - id: calm
+    label: "Calm"
+    range:
+      valence_min: 0.3
+      valence_max: 1.0
+      arousal_min: -1.0
+      arousal_max: -0.3
+
+  - id: pleased
+    label: "Pleased"
+    range:
+      valence_min: 0.3
+      valence_max: 1.0
+      arousal_min: -0.3
+      arousal_max: 0.0
+
+  - id: happy
+    label: "Happy"
+    range:
+      valence_min: 0.3
+      valence_max: 1.0
+      arousal_min: 0.0
+      arousal_max: 0.3
+  
+  - id: excited
+    label: "Excited"
+    range:
+      valence_min: 0.3
+      valence_max: 1.0
+      arousal_min: 0.3
+      arousal_max: 1.0
