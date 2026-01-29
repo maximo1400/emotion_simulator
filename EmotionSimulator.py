@@ -3,6 +3,7 @@ import pyarrow.feather as feather
 import queue
 from pathlib import Path
 import yaml
+import matplotlib.pyplot as plt
 
 # fmt: off
 FILE_PATH = "emotion_data/Dreamer/dreamer_bandpower_frames.feather"
@@ -28,15 +29,10 @@ POW_COLUMNS = [
 
 class EmotionSimulator:
     file_path = FILE_PATH
-    # states = ["relaxed", "happy", "sad", "angry", "fearful", "disgusted", "surprised"]
     emotion_range = (-1.0, 1.0)
     emot_states_area = {}
-    sequences = {
-        "basic": [("sad", 1), ("happy", 1), ("angry", 1), ("relaxed", 1)],
-        "extended": [("sad", 1), ("happy", 1.5), ("angry", 0.5), ("relaxed", 1)],
-        "neutral": [("neutral", 5)],
-    }
-    sequence = [("sad", 1), ("happy", 1.5), ("angry", 0.5), ("relaxed", 1)]
+    sequences = {}
+    sequence = []
     sub_id = 1  # Subject ID to simulate
     data_frec = 8  # Hz
     data = None
@@ -67,6 +63,7 @@ class EmotionSimulator:
                 va = (emot_range["valence_min"], emot_range["valence_max"])
                 ar = (emot_range["arousal_min"], emot_range["arousal_max"])
                 self.emot_states_area[id] = {"label": label, "va": va, "ar": ar}
+            self.sequences = yml_data["sequences"]
         except yaml.YAMLError as e:
             raise RuntimeError(f"Invalid YAML in {path}: {e}")
 
@@ -91,8 +88,6 @@ class EmotionSimulator:
         ) + emot_min
 
         # create a plot to verify normalization
-        # import matplotlib.pyplot as plt
-
         # plt.scatter(self.data["valence"], self.data["arousal"])
         # plt.xlabel("Valence")
         # plt.ylabel("Arousal")
@@ -114,13 +109,13 @@ class EmotionSimulator:
             )
             self.data.loc[condition, "state"] = state
             self.emot_states.append(state)
-            print(self.data[condition].shape[0], "rows assigned to state", state)
+        #     print(self.data[condition].shape[0], "rows assigned to state", state)
 
-        for state, ranges in self.emot_states_area.items():
-            # print the number of rows per state
-            count = self.data[self.data["state"] == state].shape[0]
-            print(f"State '{state}': {count} rows.")
-        print("Total states:", len(self.emot_states))
+        # for state, ranges in self.emot_states_area.items():
+        #     # print the number of rows per state
+        #     count = self.data[self.data["state"] == state].shape[0]
+        #     print(f"State '{state}': {count} rows.")
+        # print("Total states:", len(self.emot_states))
 
     def get_emotion_pow(self):
         for emot in self.emot_states:
@@ -199,8 +194,6 @@ class EmotionSimulator:
         #     time.sleep(0.1)
 
     def plot_emotion_distribution(self):
-        import matplotlib.pyplot as plt
-
         plt.figure(figsize=(10, 6))
 
         # Define colors for each state

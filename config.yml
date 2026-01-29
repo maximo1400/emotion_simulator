@@ -106,3 +106,20 @@ emotional_states_areas:
       valence_max: 1.0
       arousal_min: 0.3
       arousal_max: 1.0
+
+sequences:
+  basic:
+    - ["sad", 1]
+    - ["happy", 1]
+    - ["angry", 1]
+    - ["relaxed", 1]
+  extended:
+    - ["sad", 1]
+    - ["happy", 1.5]
+    - ["angry", 0.5]
+    - ["relaxed", 1]
+  neutral:
+    - ["neutral", 5]
+  bored_angry:
+    - ["bored", 2]
+    - ["angry", 2]
