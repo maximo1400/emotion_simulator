@@ -1,11 +1,13 @@
 import time
 import pyarrow.feather as feather
 import queue
-
+from pathlib import Path
+import yaml
 
 # fmt: off
 FILE_PATH = "emotion_data/Dreamer/dreamer_bandpower_frames.feather"
-pow_columns= [
+YAML_PATH = "config.yml"
+POW_COLUMNS = [
         "AF3/theta", "AF3/alpha", "AF3/betaL", "AF3/betaH", "AF3/gamma",
         "F7/theta",  "F7/alpha",  "F7/betaL",  "F7/betaH",  "F7/gamma",
         "F3/theta",  "F3/alpha",  "F3/betaL",  "F3/betaH",  "F3/gamma",
@@ -28,19 +30,7 @@ class EmotionSimulator:
     file_path = FILE_PATH
     # states = ["relaxed", "happy", "sad", "angry", "fearful", "disgusted", "surprised"]
     emotion_range = (-1.0, 1.0)
-    emot_states_area = {
-        # Low valence, low arousal
-        "sad": {"va": (-1.0, 0.0), "ar": (-1.0, 0.0)},
-        # Low valence, high arousal
-        "angry": {"va": (-1.0, 0.0), "ar": (0.0, 1.0)},
-        "fearful": {"va": (-0.5, 0.0), "ar": (0.0, 1.0)},
-        # High valence, low arousal
-        "relaxed": {"va": (0.0, 1.0), "ar": (-1.0, 0.0)},
-        "neutral": {"va": (-0.25, 0.25), "ar": (-0.25, 0.25)},
-        # High valence, high arousal
-        "happy": {"va": (0.0, 1.0), "ar": (0.0, 1.0)},
-        "surprised": {"va": (0.5, 1.0), "ar": (0.5, 1.0)},
-    }
+    emot_states_area = {}
     sequences = {
         "basic": [("sad", 1), ("happy", 1), ("angry", 1), ("relaxed", 1)],
         "extended": [("sad", 1), ("happy", 1.5), ("angry", 0.5), ("relaxed", 1)],
@@ -51,16 +41,36 @@ class EmotionSimulator:
     data_frec = 8  # Hz
     data = None
     out_queue = None
-    emotiv_columns = pow_columns
+    emotiv_columns = POW_COLUMNS
     emot_states = list(emot_states_area.keys())
     pow_by_state = {}
     pow_read = {}
 
     def __init__(self, queue: queue.Queue):
         self.out_queue = queue
-        pass
+        self.load_yml_config()
+        self.load_pow_data()
+        self.add_emot_states()
+        self.get_emotion_pow()
+        print("Emotion Simulator initialized.")
 
-    def load_data(self):
+    def load_yml_config(self, path: str | Path = YAML_PATH) -> dict | list:
+        """Parse a YAML file and return the Python object it represents."""
+        path = Path(path).expanduser()
+        try:
+            yml_data = yaml.safe_load(path.read_text(encoding="utf-8"))
+            emot_states = yml_data["emotional_states_areas"]
+            for state in emot_states:
+                id = state["id"]
+                label = state["label"]
+                emot_range = state["range"]
+                va = (emot_range["valence_min"], emot_range["valence_max"])
+                ar = (emot_range["arousal_min"], emot_range["arousal_max"])
+                self.emot_states_area[id] = {"label": label, "va": va, "ar": ar}
+        except yaml.YAMLError as e:
+            raise RuntimeError(f"Invalid YAML in {path}: {e}")
+
+    def load_pow_data(self):
         self.data = feather.read_feather(self.file_path)
 
         # normalize valence and arousal to self.emotion_range
@@ -80,30 +90,37 @@ class EmotionSimulator:
             emot_max - emot_min
         ) + emot_min
 
-    def add_states(self):
-        self.data["state"] = "neutral"  # Default state
+        # create a plot to verify normalization
+        # import matplotlib.pyplot as plt
+
+        # plt.scatter(self.data["valence"], self.data["arousal"])
+        # plt.xlabel("Valence")
+        # plt.ylabel("Arousal")
+        # plt.title("Valence vs Arousal after normalization")
+        # plt.show()
+
+    def add_emot_states(self):
+        self.data["state"] = "NA"  # Default state
         for state, ranges in self.emot_states_area.items():
             va_min, va_max = ranges["va"]
             ar_min, ar_max = ranges["ar"]
 
             condition = (
-                (self.data["valence"] >= va_min)
+                (self.data["state"] == "NA")  # Only unassigned rows
+                & (self.data["valence"] >= va_min)
                 & (self.data["valence"] <= va_max)
                 & (self.data["arousal"] >= ar_min)
                 & (self.data["arousal"] <= ar_max)
             )
             self.data.loc[condition, "state"] = state
-            # print(self.data[condition].shape[0], "rows assigned to state", state)
+            self.emot_states.append(state)
+            print(self.data[condition].shape[0], "rows assigned to state", state)
 
-    def update_queue(self, pow) -> None:
-        # while not self.out_queue.empty():
-        #     time.sleep(0.1)
-
-        self.out_queue.put(pow)
-        print(f"new data put in queue, mean: {sum(pow) / len(pow):.4f}")
-
-        # while not self.out_queue.empty():
-        #     time.sleep(0.1)
+        for state, ranges in self.emot_states_area.items():
+            # print the number of rows per state
+            count = self.data[self.data["state"] == state].shape[0]
+            print(f"State '{state}': {count} rows.")
+        print("Total states:", len(self.emot_states))
 
     def get_emotion_pow(self):
         for emot in self.emot_states:
@@ -113,10 +130,40 @@ class EmotionSimulator:
             data = self.data[mask].reindex(columns=self.emotiv_columns)
             self.pow_by_state[emot] = data
             self.pow_read[emot] = 0
+            print(f"State '{emot}': {data.shape[0]} rows loaded.")
 
     def zero_pow_read(self):
         for emot in self.emot_states:
             self.pow_read[emot] = 0
+
+    def imput_msg(self):
+        msg = "Select sequence to simulate:\n"
+        i = 0
+        for key in self.sequences.keys():
+            msg += f"{i} - {key}\n"
+            i += 1
+        msg += "or 'q' to quit:\n"
+        return msg
+
+    def decode_msg_num(self, msg_num):
+        i = 0
+        for key in self.sequences.keys():
+            if i == msg_num:
+                return key
+            i += 1
+
+    def main_loop(self):
+        while True:
+            msg = self.imput_msg()
+            state = input(msg)
+            if state == "q":
+                break
+            msg = self.decode_msg_num(int(state))
+            if msg in self.sequences.keys():
+                self.sequence = self.sequences[msg]
+                print(f"Selected sequence: {msg}")
+                self.output_loop()
+                self.zero_pow_read()
 
     def output_loop(self):
         # print(self.data.columns)
@@ -141,45 +188,83 @@ class EmotionSimulator:
                     self.pow_read[state] = 0
                 t_cur = time.time()
 
-    def imput_msg(self):
-        msg = "Select sequence to simulate:\n"
-        i = 0
-        for key in self.sequences.keys():
-            msg += f"{i} - {key}\n"
-            i += 1
-        msg += "or 'q' to quit:\n"
-        return msg
+    def update_queue(self, pow) -> None:
+        # while not self.out_queue.empty():
+        #     time.sleep(0.1)
 
-    def decode_msg_num(self, msg_num):
-        i = 0
-        for key in self.sequences.keys():
-            if i == msg_num:
-                return key
-            i += 1
+        self.out_queue.put(pow)
+        print(f"new data put in queue, mean: {sum(pow) / len(pow):.4f}")
 
-    def main_loop(self):
-        self.load_data()
-        self.add_states()
-        self.get_emotion_pow()
-        while True:
-            msg = self.imput_msg()
-            state = input(msg)
-            if state == "q":
-                break
-            msg = self.decode_msg_num(int(state))
-            if msg in self.sequences.keys():
-                self.sequence = self.sequences[msg]
-                print(f"Selected sequence: {msg}")
-                self.output_loop()
-                self.zero_pow_read()
+        # while not self.out_queue.empty():
+        #     time.sleep(0.1)
 
-        self.get_emotion_pow()
-        self.output_loop()
+    def plot_emotion_distribution(self):
+        import matplotlib.pyplot as plt
+
+        plt.figure(figsize=(10, 6))
+
+        # Define colors for each state
+        colors = plt.cm.tab10.colors
+        state_colors = {
+            state: colors[i % len(colors)]
+            for i, state in enumerate(self.emot_states_area.keys())
+        }
+
+        for state, ranges in self.emot_states_area.items():
+            va_min, va_max = ranges["va"]
+            ar_min, ar_max = ranges["ar"]
+
+            # Plot the filled emotional state area
+            rectangle = plt.Rectangle(
+                (va_min, ar_min),
+                va_max - va_min,
+                ar_max - ar_min,
+                linewidth=2,
+                edgecolor="black",
+                facecolor=state_colors[state],
+                alpha=0.3,
+                label=state,
+            )
+            plt.gca().add_patch(rectangle)
+
+            # Add label in center of rectangle
+            plt.text(
+                (va_min + va_max) / 2,
+                (ar_min + ar_max) / 2,
+                state,
+                ha="center",
+                va="center",
+                fontsize=9,
+                fontweight="bold",
+            )
+
+        # Plot scatter points on top
+        for state, ranges in self.emot_states_area.items():
+            state_data = self.data[self.data["state"] == state]
+            plt.scatter(
+                state_data["valence"],
+                state_data["arousal"],
+                # color=state_colors[state],
+                color="red",
+                alpha=0.6,
+                s=20,
+            )
+
+        plt.xlabel("Valence")
+        plt.ylabel("Arousal")
+        plt.title("Valence vs Arousal with Emotional State Areas")
+        # plt.legend(loc="upper left")
+        plt.grid(alpha=0.3)
+        margin = 0.1
+        plt.xlim(self.emotion_range[0] - margin, self.emotion_range[1] + margin)
+        plt.ylim(self.emotion_range[0] - margin, self.emotion_range[1] + margin)
+        plt.show()
 
 
 def main():
     out = queue.Queue()
     simulator = EmotionSimulator(out)
+    simulator.plot_emotion_distribution()
     simulator.main_loop()
 
 

@@ -1,4 +1,4 @@
-emotions:
+emotional_states_areas:
   # Column 1 -> Low Valence [-1.0, -0.3]
   - id: bored
     label: "Bored"
