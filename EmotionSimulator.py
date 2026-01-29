@@ -23,18 +23,19 @@ POW_COLUMNS = [
         "F4/theta",  "F4/alpha",  "F4/betaL",  "F4/betaH",  "F4/gamma",
         "F8/theta",  "F8/alpha",  "F8/betaL",  "F8/betaH",  "F8/gamma",
         "AF4/theta", "AF4/alpha", "AF4/betaL", "AF4/betaH", "AF4/gamma"]
+EMOTIV_POW_FREC = 8  # Hz
 
 # fmt: on
 
 
 class EmotionSimulator:
     file_path = FILE_PATH
-    emotion_range = (-1.0, 1.0)
+    emotion_range = None
     emot_states_area = {}
     sequences = {}
     sequence = []
-    sub_id = 1  # Subject ID to simulate
-    data_frec = 8  # Hz
+    sub_id = None
+    data_frec = EMOTIV_POW_FREC  # Hz
     data = None
     out_queue = None
     emotiv_columns = POW_COLUMNS
@@ -64,6 +65,8 @@ class EmotionSimulator:
                 ar = (emot_range["arousal_min"], emot_range["arousal_max"])
                 self.emot_states_area[id] = {"label": label, "va": va, "ar": ar}
             self.sequences = yml_data["sequences"]
+            self.sub_id = yml_data["sub_id"]
+            self.emotion_range = yml_data["emotion_range"]
         except yaml.YAMLError as e:
             raise RuntimeError(f"Invalid YAML in {path}: {e}")
 
@@ -87,13 +90,6 @@ class EmotionSimulator:
             emot_max - emot_min
         ) + emot_min
 
-        # create a plot to verify normalization
-        # plt.scatter(self.data["valence"], self.data["arousal"])
-        # plt.xlabel("Valence")
-        # plt.ylabel("Arousal")
-        # plt.title("Valence vs Arousal after normalization")
-        # plt.show()
-
     def add_emot_states(self):
         self.data["state"] = "NA"  # Default state
         for state, ranges in self.emot_states_area.items():
@@ -109,19 +105,15 @@ class EmotionSimulator:
             )
             self.data.loc[condition, "state"] = state
             self.emot_states.append(state)
-        #     print(self.data[condition].shape[0], "rows assigned to state", state)
-
-        # for state, ranges in self.emot_states_area.items():
-        #     # print the number of rows per state
-        #     count = self.data[self.data["state"] == state].shape[0]
-        #     print(f"State '{state}': {count} rows.")
-        # print("Total states:", len(self.emot_states))
+            # print(self.data[condition].shape[0], "rows assigned to state", state)
 
     def get_emotion_pow(self):
         for emot in self.emot_states:
             s_state = self.data["state"] == emot
             s_sub = self.data["subject_id"] == self.sub_id
             mask = s_state & s_sub
+            if self.sub_id == -1:
+                mask = s_state
             data = self.data[mask].reindex(columns=self.emotiv_columns)
             self.pow_by_state[emot] = data
             self.pow_read[emot] = 0

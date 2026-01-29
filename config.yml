@@ -1,3 +1,5 @@
+sub_id: 4    # Subject ID to simulate (-1 for all subjects; 4 works well)
+emotion_range: [-1.0, 1.0]
 emotional_states_areas:
   # Column 1 -> Low Valence [-1.0, -0.3]
   - id: bored
