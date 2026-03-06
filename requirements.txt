@@ -8,3 +8,5 @@ notebook
 ipykernel
 torcheeg
 pyyaml
+websocket-client
+python-dispatch
