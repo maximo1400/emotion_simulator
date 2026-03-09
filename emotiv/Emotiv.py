@@ -307,7 +307,11 @@ class Train:
 
         if error_code == cortex.ERR_PROFILE_ACCESS_DENIED:
             # disconnect headset for next use
-            print("Get error " + error_message + ". Disconnect headset to fix this issue for next use.")
+            print(
+                "Get error "
+                + error_message
+                + ". Disconnect headset to fix this issue for next use."
+            )
             self.c.disconnect_headset()
 
     def unsub(self, streams):
@@ -411,6 +415,7 @@ class Train:
         data = kwargs.get("data")
         pow_data = data["pow"] + [self.img, self.current_round]
         self.data["pow"].loc[len(self.data["pow"])] = pow_data
+        self.queue.put(pow_data)
         if self.verbose:
             print("pow data: {}".format(data))
 
