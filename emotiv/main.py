@@ -3,7 +3,7 @@ import threading
 import os
 import queue
 from dotenv import load_dotenv
-from emotiv.Emotiv import Train
+from Emotiv import Train
 
 load_dotenv()
 
